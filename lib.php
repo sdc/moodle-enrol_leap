@@ -604,4 +604,14 @@ class enrol_leap_plugin extends enrol_plugin {
             $this->enrol_user($instance, $userid, $roleid, $timestart, $timeend, $status, $recovergrades);
         }
     }
+
+
+    // Out of date ideas, code and "help" from http://docs.moodle.org/dev/Enrolment_plugins#Automated_enrolment.
+    // http://xref-diff.mukudu-dev.net/moodle28/lib/enrollib.php.source.html#l1516
+    public function sync_user_enrolments($user) {
+        // Bulk copy code from the old plugin into this function!!
+        // Only copy what's needed...
+
+    }
+
 }
