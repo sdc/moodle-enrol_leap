@@ -1,0 +1,1 @@
+This is a very basic, initial readme. This is an enrolment plugin for Moodle 2.7 or better, which uses the open source eILP system Leap (leap-ilp.com and @leapilp) from South Devon College. You can download it and install it (hack it, commit it and submit a pull request), but it really only has value if you're using Leap at your institution.
