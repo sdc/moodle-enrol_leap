@@ -31,5 +31,6 @@ $plugin->maturity       = MATURITY_ALPHA;
 $plugin->release        = '3.0.0';
 $plugin->dependencies   = array (
     'local_leapwebservices' => 2014112400,  // Needs the Leap web services local plugin.
+    'block_leap'            => 2015062500,  // Needs this version or later of the Leap block.
 );
 $plugin->cron           = 600;
