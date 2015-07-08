@@ -621,7 +621,7 @@ class enrol_leap_plugin extends enrol_plugin {
 
         global $CFG, $DB;
 
-        // Reuse a function from the Leap block.
+        // Reuse a function from the Leap block (which this plugin is dependent on).
         require_once( $CFG->dirroot . '/blocks/leap/locallib.php' );
 
         // Create the current academic year; store for later use.
@@ -648,6 +648,8 @@ class enrol_leap_plugin extends enrol_plugin {
         }
 
         // Get the user's id number.
+        // TODO: Do we need this any more?
+        /*
         if ( !property_exists( $user, 'idnumber' ) ) {
             if ( $this->logging ) {
                 error_log( $this->errorlogtag . '  Missing "idnumber" for ' . $user->id );
@@ -658,7 +660,7 @@ class enrol_leap_plugin extends enrol_plugin {
             if ( $this->fulllogging ) {
                 error_log( $this->errorlogtag . ' <"idnumber" found for ' . $user->id );
             }
-        }
+        } */
 
         // Take Shibboleth's "@[student.]southdevon.ac.uk" off the username.
         $unameparts = explode( '@', $user->username );
@@ -710,7 +712,7 @@ class enrol_leap_plugin extends enrol_plugin {
 
         // Some epic logging, prob not needed unless extreme debugging is taking place.
         if ($this->fulllogging) {
-            error_log($this->errorlogtag . ' <'.$url);
+            error_log( $this->errorlogtag . ' <' . $url );
         }
 
 
@@ -817,7 +819,7 @@ $sample_leap_json = '{"view":{"id":5,"parent_id":null,"icon":"fa-mortar-board","
         $leap_json = '';
         /*if ( !$leap_xml = file_get_contents($url) ) {*/
         if ( !$leap_json = file_get_contents( $url ) ) {
-            error_log($this->errorlogtag . '  Couldn\'t get the JSON from Leap.');
+            error_log( $this->errorlogtag . '  Couldn\'t get the JSON from Leap.' );
         }
 
 /*
@@ -857,14 +859,10 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
 
         $leap_data = json_decode( $leap_json );
 
-//var_dump($leap_data->events); exit(0);
-
         // Check the JSON for conditions and pull out what we need.
         foreach ( $leap_data->events as $events ) {
-//var_dump($events->eventable); exit(0);
 
             foreach ( $events->eventable as $eventable ) {
-//var_dump($eventable); exit(0);
 
                 // If the enrolment status is 'current'.
                 if ( $event['status'] == 'current' ) {
@@ -886,18 +884,21 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                             error_log($this->errorlogtag . '  Academic year \''.$acadyear.'\' matches that found in the XML');
                         }
 
+                        /* This bit needs to be changed to get course codes from course Leap block instance configurations. */
+                        /* While overall this is better, I can't help but think this may be slow... */
                         // Get the course code from the part of the 'idnumber' field.
-                        $courseobjects = $DB->get_records_select('course', 'idnumber LIKE "%'.$coursecode.'%"', array(), '', 'id,idnumber');
+                        //$courseobjects = $DB->get_records_select( 'course', 'idnumber LIKE "%' . $coursecode . '%"', array(), '', 'id,idnumber');
 
                         // If the course the user is enrolled on exists in Moodle.
-                        if (!empty($courseobjects)) {
+                        if ( !empty( $courseobjects ) ) {
 
                             if ($this->logging) {
-                                error_log($this->errorlogtag . '  Course '.$coursecode.' exists');
+                                error_log($this->errorlogtag . '  Course ' . $coursecode . ' exists');
                             }
 
                             // Loop through all courses found.
-                            foreach ($courseobjects as $courseobj) {
+                            // TODO: Should more than one course have the same coursecode?
+                            foreach ( $courseobjects as $courseobj ) {
 
                                 // Get the course context for this course.
                                 $context = context_course::instance($courseobj->id);
@@ -905,13 +906,13 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                                 // Get the enrolment plugin instance.
                                 // TODO: 'manual' probably needs to be changed ('leap'?).
                                 // TODO: roleid should probably be queried, rather than just set here.
-                                $enrolid = $DB->get_record('enrol', array(
+                                $enrolid = $DB->get_record( 'enrol', array(
                                     'enrol'     => 'leap',          // Add the enrolments in as manual, to be better managed by teachers/managers.
                                     'courseid'  => $courseobj->id,  // This course.
                                     'roleid'    => 5                // Student role.
-                                ), 'id');
+                                ), 'id' );
 
-                                if (!$enrolid) {
+                                if ( !$enrolid ) {
                                     // Couldn't find an instance of the manual enrolment plugin. D'oh.
                                     if ($this->logging) {
                                         error_log($this->errorlogtag . ' >No manual-student instance for course '.$coursecode);
@@ -940,7 +941,7 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                                         $newenrolment = new stdClass();
                                         $newenrolment->enrolid      = $enrolid->id;
                                         $newenrolment->userid       = $user->id;
-                                        $newenrolment->modifierid   = 406;          // ID of 'leapuser' in live Moodle.
+                                        $newenrolment->modifierid   = 406;          // ID of 'leapuser' in live Moodle. TODO: query this from the db.
                                         $newenrolment->timestart    = $timenow;
                                         $newenrolment->timeend      = 0;
                                         $newenrolment->timecreated  = $timenow;
