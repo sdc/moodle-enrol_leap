@@ -32,8 +32,8 @@ class enrol_leap_plugin extends enrol_plugin {
     protected $errorlogtag = '[ENROL_LEAP] ';
     /**
      * Debugging options
-     * 1. Set $logging = true to write useful debug information to /var/log/apache/error.log.
-     * 2. Set $fulllogging = true to write EVEN MORE USEFUL debug information (and lots of it).
+     * 1. Set $logging = true to write useful information to Apache's error log.
+     * 2. Set $fulllogging = true to write debug-level useful information to Apache's error log.
      */
     protected $logging = true;
     protected $fulllogging = false;
@@ -618,7 +618,11 @@ class enrol_leap_plugin extends enrol_plugin {
     // Ideas, code and help from http://docs.moodle.org/dev/Enrolment_plugins#Automated_enrolment.
     // TODO: Pulled directly from the 2.7 (et al) plugin. Refactor!!
     public function sync_user_enrolments($user) {
+
         global $CFG, $DB;
+
+        // Reuse a function from the Leap block.
+        require_once( $CFG->dirroot . '/blocks/leap/locallib.php' );
 
         // Create the current academic year; store for later use.
         $now    = time();
@@ -695,11 +699,14 @@ class enrol_leap_plugin extends enrol_plugin {
         }
 */
 
+
         // This will more than likely change when a new URL is available.
         // Development URL: http://172.21.11.5:3000/people/10083332/views/courses.json
         // TODO: URL comes from the Leap block.
         // TODO: tracker hash comes from the user created when the Webservices plugin was installed and configured.
-        $url = preg_replace( '/USERNAME/', $uname, $CFG->enrol_leap_url ) . '?token=' . $CFG->trackerhash;
+        $leap_url = get_config( 'block_leap', 'leap_url' );
+        $leap_auth_token = get_auth_token();
+        $url = preg_replace( '/USERNAME/', $uname, $leap_url ) . '?token=' . $leap_auth_token->token;
 
         // Some epic logging, prob not needed unless extreme debugging is taking place.
         if ($this->fulllogging) {
@@ -837,158 +844,172 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
 */
 
 
-        $fragment = $dom->createDocumentFragment();
-        $fragment->appendXML($allstudentsxml);
-        $dom->documentElement->appendChild($fragment);
+        //$fragment = $dom->createDocumentFragment();
+        //$fragment->appendXML($allstudentsxml);
+        //$dom->documentElement->appendChild($fragment);
 
-        if ($this->fulllogging) {
-            error_log($this->errorlogtag . ' <'.$dom->saveXML());
+        /* Testing purposes only! */
+        $leap_json = $sample_leap_json;
+
+        if ( $this->fulllogging ) {
+            error_log( $this->errorlogtag . ' <' . $leap_json );
         }
 
-        // Walk through the XML, checking for conditions and pulling out what we need.
-        foreach ($dom->getElementsByTagName('event') as $event) {
+        $leap_data = json_decode( $leap_json );
 
-            // If the enrolment status is 'current'.
-            if ($event->getElementsByTagName('status')->item(0)->nodeValue == 'current') {
-                $enrolment = $event->getElementsByTagName('code')->item(0)->nodeValue;
+//var_dump($leap_data->events); exit(0);
 
-                if ($this->logging) {
-                    error_log($this->errorlogtag . '  Found current course enrolment "'.$enrolment.'"');
-                }
+        // Check the JSON for conditions and pull out what we need.
+        foreach ( $leap_data->events as $events ) {
+//var_dump($events->eventable); exit(0);
 
-                // If the current academic year (generated above) matches that of the XML
-                $acadyearxml = $event->getElementsByTagName('year')->item(0)->nodeValue;
-                if ($acadyearxml == $acadyear) {
+            foreach ( $events->eventable as $eventable ) {
+//var_dump($eventable); exit(0);
 
-                    if ($this->logging) {
-                        error_log($this->errorlogtag . '  Academic year \''.$acadyear.'\' matches that found in the XML');
+                // If the enrolment status is 'current'.
+                if ( $event['status'] == 'current' ) {
+
+                    // Still waiting on course codes in the JSON from Kev.
+                    // Still waiting on course groups in the JSON from Kev.
+                    $coursecode = $event['coursecode'];
+                    $coursegroup = $event['groupcode'];
+
+                    if ( $this->logging ) {
+                        error_log( $this->errorlogtag . '  Found current course enrolment "' . $coursecode . '"' );
                     }
 
-                    // Get the course code from the part of the 'idnumber' field.
-                    $courseobjects = $DB->get_records_select('course', 'idnumber LIKE "%'.$enrolment.'%"', array(), '', 'id,idnumber');
-
-                    // If the course the user is enrolled on exists in Moodle.
-                    if (!empty($courseobjects)) {
+                    // If the current academic year (generated above) matches that of the XML
+                    $acadyearxml = $event->getElementsByTagName('year')->item(0)->nodeValue;
+                    if ($acadyearxml == $acadyear) {
 
                         if ($this->logging) {
-                            error_log($this->errorlogtag . '  Course '.$enrolment.' exists');
+                            error_log($this->errorlogtag . '  Academic year \''.$acadyear.'\' matches that found in the XML');
                         }
 
-                        // Loop through all courses found.
-                        foreach ($courseobjects as $courseobj) {
+                        // Get the course code from the part of the 'idnumber' field.
+                        $courseobjects = $DB->get_records_select('course', 'idnumber LIKE "%'.$coursecode.'%"', array(), '', 'id,idnumber');
 
-                            // Get the course context for this course.
-                            $context = context_course::instance($courseobj->id);
+                        // If the course the user is enrolled on exists in Moodle.
+                        if (!empty($courseobjects)) {
 
-                            // Get the enrolment plugin instance.
-                            // TODO: 'manual' probably needs to be changed ('leap'?).
-                            // TODO: roleid should probably be queried, rather than just set here.
-                            $enrolid = $DB->get_record('enrol', array(
-                                'enrol'     => 'leap',          // Add the enrolments in as manual, to be better managed by teachers/managers.
-                                'courseid'  => $courseobj->id,  // This course.
-                                'roleid'    => 5                // Student role.
-                            ), 'id');
+                            if ($this->logging) {
+                                error_log($this->errorlogtag . '  Course '.$coursecode.' exists');
+                            }
 
-                            if (!$enrolid) {
-                                // Couldn't find an instance of the manual enrolment plugin. D'oh.
-                                if ($this->logging) {
-                                    error_log($this->errorlogtag . ' >No manual-student instance for course '.$enrolment);
-                                }
-                            } else {
-                                // A user's course enrolment is utterly separate to their role on that course.
-                                // We check for course enrolment, then separately we check for role assignment.
+                            // Loop through all courses found.
+                            foreach ($courseobjects as $courseobj) {
 
+                                // Get the course context for this course.
+                                $context = context_course::instance($courseobj->id);
 
-                                /**
-                                 * Part 1: Enrol the user onto the course.
-                                 */
-                                if ($DB->record_exists('user_enrolments', array('enrolid' => $enrolid->id, 'userid' => $user->id))) {
-                                    // User already enrolled.
+                                // Get the enrolment plugin instance.
+                                // TODO: 'manual' probably needs to be changed ('leap'?).
+                                // TODO: roleid should probably be queried, rather than just set here.
+                                $enrolid = $DB->get_record('enrol', array(
+                                    'enrol'     => 'leap',          // Add the enrolments in as manual, to be better managed by teachers/managers.
+                                    'courseid'  => $courseobj->id,  // This course.
+                                    'roleid'    => 5                // Student role.
+                                ), 'id');
+
+                                if (!$enrolid) {
+                                    // Couldn't find an instance of the manual enrolment plugin. D'oh.
                                     if ($this->logging) {
-                                        error_log($this->errorlogtag . '   User '.$user->id.' already enrolled on course '.$enrolment.'!');
+                                        error_log($this->errorlogtag . ' >No manual-student instance for course '.$coursecode);
                                     }
-
                                 } else {
-                                    if ($this->logging) {
-                                        error_log($this->errorlogtag . '   Performing enrolment for '.$uname.'/'.$user->id.' onto course '.$enrolment);
-                                    }
+                                    // A user's course enrolment is utterly separate to their role on that course.
+                                    // We check for course enrolment, then separately we check for role assignment.
 
-                                    // Enrol the user.
-                                    $timenow = time();
-                                    $newenrolment = new stdClass();
-                                    $newenrolment->enrolid      = $enrolid->id;
-                                    $newenrolment->userid       = $user->id;
-                                    $newenrolment->modifierid   = 406;          // ID of 'leapuser' in live Moodle.
-                                    $newenrolment->timestart    = $timenow;
-                                    $newenrolment->timeend      = 0;
-                                    $newenrolment->timecreated  = $timenow;
-                                    $newenrolment->timemodified = $timenow;
-                                    if (!$DB->insert_record('user_enrolments', $newenrolment)) {
+
+                                    /**
+                                     * Part 1: Enrol the user onto the course.
+                                     */
+                                    if ($DB->record_exists('user_enrolments', array('enrolid' => $enrolid->id, 'userid' => $user->id))) {
+                                        // User already enrolled.
                                         if ($this->logging) {
-                                            error_log($this->errorlogtag . '  >Enrolment failed for '.$uname.'/'.$user->id.' onto course '.$enrolment);
+                                            error_log($this->errorlogtag . '   User '.$user->id.' already enrolled on course '.$coursecode.'!');
                                         }
+
                                     } else {
                                         if ($this->logging) {
-                                            error_log($this->errorlogtag . '   Enrolment succeeded');
+                                            error_log($this->errorlogtag . '   Performing enrolment for '.$uname.'/'.$user->id.' onto course '.$coursecode);
                                         }
-                                    }
-                                } // End enrolment.
+
+                                        // Enrol the user.
+                                        $timenow = time();
+                                        $newenrolment = new stdClass();
+                                        $newenrolment->enrolid      = $enrolid->id;
+                                        $newenrolment->userid       = $user->id;
+                                        $newenrolment->modifierid   = 406;          // ID of 'leapuser' in live Moodle.
+                                        $newenrolment->timestart    = $timenow;
+                                        $newenrolment->timeend      = 0;
+                                        $newenrolment->timecreated  = $timenow;
+                                        $newenrolment->timemodified = $timenow;
+                                        if (!$DB->insert_record('user_enrolments', $newenrolment)) {
+                                            if ($this->logging) {
+                                                error_log($this->errorlogtag . '  >Enrolment failed for '.$uname.'/'.$user->id.' onto course '.$coursecode);
+                                            }
+                                        } else {
+                                            if ($this->logging) {
+                                                error_log($this->errorlogtag . '   Enrolment succeeded');
+                                            }
+                                        }
+                                    } // End enrolment.
 
 
-                                /**
-                                 * Part 2: Assign the user the user's role.
-                                 */
+                                    /**
+                                     * Part 2: Assign the user the user's role.
+                                     */
 
-                                // Looking at the code in the following location, we may not need to check for an existing enrolment?
-                                // http://xref-diff.mukudu-dev.net/moodle27/lib/accesslib.php.source.html#l1666
+                                    // Looking at the code in the following location, we may not need to check for an existing enrolment?
+                                    // http://xref-diff.mukudu-dev.net/moodle27/lib/accesslib.php.source.html#l1666
 
-                                // TODO: shouldn't be hard-coding this. New query: SELECT id FROM mdl_role where shortname = 'student';
-                                $roletoassign = 5; // Student.
+                                    // TODO: shouldn't be hard-coding this. New query: SELECT id FROM mdl_role where shortname = 'student';
+                                    $roletoassign = 5; // Student.
 
-                                // TODO: checking for just a student role could end up enrolling someone as a student and as a teacher (possibly).
-                                if ($DB->record_exists('role_assignments', array('roleid' => $roletoassign, 'userid' => $user->id, 'contextid' => $context->id))) {
-                                    // User already enrolled.
-                                    if ($this->logging) {
-                                        error_log($this->errorlogtag . '   User '.$user->id.' already assigned role '.$roletoassign.' on course '.$enrolment.'!');
-                                    }
-
-                                } else {
-                                    // Assign the user's role on the course.
-                                    // TODO: 'enrol_leap' and the itemid can be queried from elsewhere? Static code here is a bad idea.
-                                    // TODO: not sure about the final null. Test it.
-                                    if (!role_assign($roletoassign, $user->id, $context->id, 'enrol_leap', 0, null )) {
+                                    // TODO: checking for just a student role could end up enrolling someone as a student and as a teacher (possibly).
+                                    if ($DB->record_exists('role_assignments', array('roleid' => $roletoassign, 'userid' => $user->id, 'contextid' => $context->id))) {
+                                        // User already enrolled.
                                         if ($this->logging) {
-                                            error_log($this->errorlogtag . '  >Role assignment '.$roletoassign.' failed for '.$uname.'/'.$user->id.' onto course '.$enrolment);
+                                            error_log($this->errorlogtag . '   User '.$user->id.' already assigned role '.$roletoassign.' on course '.$coursecode.'!');
                                         }
+
                                     } else {
-                                        if ($this->logging) {
-                                            error_log($this->errorlogtag . '   Role assignment '.$roletoassign.' succeeded');
+                                        // Assign the user's role on the course.
+                                        // TODO: 'enrol_leap' and the itemid can be queried from elsewhere? Static code here is a bad idea.
+                                        // TODO: not sure about the final null. Test it.
+                                        if (!role_assign($roletoassign, $user->id, $context->id, 'enrol_leap', 0, null )) {
+                                            if ($this->logging) {
+                                                error_log($this->errorlogtag . '  >Role assignment '.$roletoassign.' failed for '.$uname.'/'.$user->id.' onto course '.$coursecode);
+                                            }
+                                        } else {
+                                            if ($this->logging) {
+                                                error_log($this->errorlogtag . '   Role assignment '.$roletoassign.' succeeded');
+                                            }
                                         }
-                                    }
 
-                                } // End Assignment.
+                                    } // End Assignment.
 
-                                /**
-                                 * Part 3: group enrolment
-                                 * Check for a group enrolment, check for that group, create if not exists, enrol onto group.
-                                 */
+                                    /**
+                                     * Part 3: group enrolment
+                                     * Check for a group enrolment, check for that group, create if not exists, enrol onto group.
+                                     */
 
-                                // $CFG->dirroot . '/group/lib.php'
-
+                                    // $CFG->dirroot . '/group/lib.php'
 
 
 
 
 
-                                /**
-                                 * Part 4: Unenrolment. Wow.
-                                 */
 
-                                // $CFG->dirroot . '/enrol/enroluser.php'
+                                    /**
+                                     * Part 4: Unenrolment. Wow.
+                                     */
 
-                                // Compare the course to the list of enrolments
-                                // This probably can't be done one course at a time as all other courses will appear as not-enrolled.
+                                    // $CFG->dirroot . '/enrol/enroluser.php'
 
+                                    // Compare the course to the list of enrolments
+                                    // This probably can't be done one course at a time as all other courses will appear as not-enrolled.
 
 
 
@@ -996,35 +1017,36 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
 
 
 
-                            } // End enrolment plugin instance.
 
-                        } // End 'this course' looping.
+                                } // End enrolment plugin instance.
 
-                    // If the course the user is enrolled on does not exist in Moodle.
+                            } // End 'this course' looping.
+
+                        // If the course the user is enrolled on does not exist in Moodle.
+                        } else {
+                            if ($this->logging) {
+                                error_log($this->errorlogtag . '  Course '.$coursecode.' doesn\'t exist');
+                            }
+                        } // End courses loop.
+
+                    // Academic year doesn't match.
                     } else {
+                        // A quick note to say that the reason it failed was because the academic year didn't match.
                         if ($this->logging) {
-                            error_log($this->errorlogtag . '  Course '.$enrolment.' doesn\'t exist');
+                            error_log($this->errorlogtag . '  >Academic year \''.$acadyear.'\' did NOT match that found in the XML (\''.$acadyearxml.'\')');
                         }
-                    } // End courses loop.
 
-                // Academic year doesn't match.
+                    } // End academic year not matching.
+
+                // If the status is anything other then 'current'.
                 } else {
-                    // A quick note to say that the reason it failed was because the academic year didn't match.
-                    if ($this->logging) {
-                        error_log($this->errorlogtag . '  >Academic year \''.$acadyear.'\' did NOT match that found in the XML (\''.$acadyearxml.'\')');
+                    if ( $this->fulllogging ) {
+                        error_log($this->errorlogtag . ' <Ignoring "' . $event['status'] . '" course "' . $event->getElementsByTagName('code')->item(0)->nodeValue.'"');
                     }
+                } // End 'status' loop.
 
-                } // End academic year not matching.
-
-            // If the status is anything other then 'current'.
-            } else {
-                if ($this->fulllogging) {
-                    error_log($this->errorlogtag . ' <Ignoring "'.$event->getElementsByTagName('status')->item(0)->nodeValue.
-                        '" course "'.$event->getElementsByTagName('code')->item(0)->nodeValue.'"');
-                }
-            } // End 'status' loop.
-
-        } // End XML 'event' loop.
+            } // End XML 'event' loop.
+        }
 
         // Bye bye now.
         if ($this->logging) {

@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version        = 2015041700;
+$plugin->version        = 2015070800;
 $plugin->requires       = 2014051200;       // Requires Moodle 2.7 or newer.
 $plugin->component      = 'enrol_leap';
 $plugin->maturity       = MATURITY_ALPHA;
