@@ -36,7 +36,7 @@ class enrol_leap_plugin extends enrol_plugin {
      * 2. Set $fulllogging = true to write debug-level useful information to Apache's error log.
      */
     protected $logging = true;
-    protected $fulllogging = false;
+    protected $fulllogging = true;
 
     public function roles_protected() {
         // Users may tweak the roles later.
@@ -617,7 +617,7 @@ class enrol_leap_plugin extends enrol_plugin {
 
     // Ideas, code and help from http://docs.moodle.org/dev/Enrolment_plugins#Automated_enrolment.
     // TODO: Pulled directly from the 2.7 (et al) plugin. Refactor!!
-    public function sync_user_enrolments($user) {
+    public function sync_user_enrolments( $user ) {
 
         global $CFG, $DB;
 
@@ -625,6 +625,7 @@ class enrol_leap_plugin extends enrol_plugin {
         require_once( $CFG->dirroot . '/blocks/leap/locallib.php' );
 
         // Create the current academic year; store for later use.
+/*
         $now    = time();
         $year   = date( 'y', $now );
         $month  = date( 'm', $now );
@@ -633,7 +634,7 @@ class enrol_leap_plugin extends enrol_plugin {
         } else {
             $acadyear = ( $year - 1) . '/' . $year;
         }
-
+*/
 
         if ( $this->logging ) {
             error_log( $this->errorlogtag . '- Starting plugin instance' );
@@ -643,12 +644,12 @@ class enrol_leap_plugin extends enrol_plugin {
         if ( !is_object( $user ) or !property_exists( $user, 'id' ) ) {
             throw new coding_exception( 'Invalid $user parameter in sync_user_enrolments()' );
             if ( $this->logging ) {
-                error_log( $this->errorlogtag . '  Invalid $user parameter: serious error about here.' );
+                error_log( $this->errorlogtag . ' >Invalid $user parameter: serious error about here.' );
             }
         }
 
         // Get the user's id number.
-        // TODO: Do we need this any more?
+        // TODO: Do we need this any more? We don't seem to use this anywhere else in the code and the db is empty.
         /*
         if ( !property_exists( $user, 'idnumber' ) ) {
             if ( $this->logging ) {
@@ -711,7 +712,7 @@ class enrol_leap_plugin extends enrol_plugin {
         $url = preg_replace( '/USERNAME/', $uname, $leap_url ) . '?token=' . $leap_auth_token->token;
 
         // Some epic logging, prob not needed unless extreme debugging is taking place.
-        if ($this->fulllogging) {
+        if ( $this->fulllogging ) {
             error_log( $this->errorlogtag . ' <' . $url );
         }
 
@@ -819,7 +820,8 @@ $sample_leap_json = '{"view":{"id":5,"parent_id":null,"icon":"fa-mortar-board","
         $leap_json = '';
         /*if ( !$leap_xml = file_get_contents($url) ) {*/
         if ( !$leap_json = file_get_contents( $url ) ) {
-            error_log( $this->errorlogtag . '  Couldn\'t get the JSON from Leap.' );
+            error_log( $this->errorlogtag . ' >Bailing out: couldn\'t get the JSON from Leap' );
+            return false;
         }
 
 /*
@@ -900,6 +902,8 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                 }
             }
 */
+            // TESTING PURPOSES Only
+            $coursecode = 'AABB1212';
 
             // TODO: Probably move this to after the course enrolment stuff.
             // TODO: Still waiting on course groups in the JSON from Kev.
@@ -912,7 +916,7 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
             }
 
             // Do nothing, enrolment or unenrolment depending on the start and end dates.
-            $now = time();
+//            $now = time();
 //            if ( strtotime( $event->eventable->start_date > $now ) ) {
 //                // This course hasn't started yet.
 //                if ( $this->logging ) {
@@ -926,23 +930,68 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
 //
 //            } else if ( strtotime( $event->eventable->start_date ) < $now && strtotime( $event->eventable->end_date ) > $now ) {
 //                // This course is live, so enrol if not already.
-                $courses = $DB->get_records( 'course', null, 'id,shortname' );
+                $courses = $DB->get_records( 'course', null, null, 'id,shortname,fullname' );
 
 //var_dump($courses); exit();
 
                 //var_dump( $courses ); die();
+                $toenrol = array();
                 foreach ( $courses as $course ) {
                     if ( $course->id != 1 ) {
-                        var_dump($course);
-                        //echo $course->shortname . '<br>';
+
+                        $coursecontext  = context_course::instance( $course->id );
+                        $blockrecord    = $DB->get_record( 'block_instances', array( 'blockname' => 'leap', 'parentcontextid' => $coursecontext->id ) );
+                        $blockinstance  = block_instance( 'leap', $blockrecord );
+
+                        if ( stripos( $blockinstance->config->coursecodes, $coursecode ) !== false ) {
+                            $toenrol[] = $course;
+                            if ( $this->logging ) {
+                                error_log( $this->errorlogtag . '   Course code "' . $coursecode . '" found in course ' . $course->id . ' (' . $course->shortname . ')' );
+                            }
+                        } else {
+                            // Just do logging, nothing else.
+                            if ( $this->fulllogging ) {
+                                error_log( $this->errorlogtag . '   Course code "' . $coursecode . '" not found in course ' . $course->id . ' (' . $course->shortname . ')' );
+                            }
+                        }
+
                     }
                 }
-die();
+
+//var_dump($toenrol); die();
+
+                // If we found no courses with the course code in the course Leap block instance.
+                if ( empty( $toenrol ) ) {
+                    if ( $this->logging ) {
+                        error_log( $this->errorlogtag . '   No Moodle course with course code "' . $coursecode . '" found, so bailing' );
+                    }
+                    continue;
+                }
+
+                foreach ( $toenrol as $enrolme ) {
+
+                    // enrol_user()
+                    //   $this->enrol_user($instance, $userid, null, $data->timestart, $data->timeend, $data->status);
+                    // role_assign()
+
+                    // Get the enrolment plugin instance. Enrol plugin name / course ID / role ID.
+                    if ( !$enrolinstance = $DB->get_record( 'enrol', array( 'enrol' => 'leap', 'courseid' => $enrolme->id, 'roleid' => $this->get_config('roleid') ), 'id' ) ) {
+                        if ( $this->logging ) {
+                            error_log( $this->errorlogtag . '  >No Leap enrolment plugin (student) instance for course ' . $enrolme->id . '/' . $enrolme->shortname . ' so bailing' );
+                        }
+                        continue;
+                    }
+
+                    $this->enrol_user( $enrolinstance, $user->id, $this->get_config('roleid'), time(), time() + ( $this->get_config('roleid') * 60 * 60 * 24 ), ENROL_USER_ACTIVE, true);
+
+
+
+                }
+
+
+
+
 //            } // END start and end dates loop.
-
-
-
-
 
 
 
@@ -965,7 +1014,6 @@ die();
                         }
 
                         // Loop through all courses found.
-                        // TODO: Should more than one course have the same coursecode?
                         foreach ( $courseobjects as $courseobj ) {
 
                             // Get the course context for this course.
@@ -974,11 +1022,11 @@ die();
                             // Get the enrolment plugin instance.
                             // TODO: 'manual' probably needs to be changed ('leap'?).
                             // TODO: roleid should probably be queried, rather than just set here.
-                            $enrolid = $DB->get_record( 'enrol', array(
-                                'enrol'     => 'leap',          // Add the enrolments in as manual, to be better managed by teachers/managers.
-                                'courseid'  => $courseobj->id,  // This course.
-                                'roleid'    => 5                // Student role.
-                            ), 'id' );
+                            //$enrolid = $DB->get_record( 'enrol', array(
+                            //    'enrol'     => 'leap',          // Add the enrolments in as manual, to be better managed by teachers/managers.
+                            //    'courseid'  => $courseobj->id,  // This course.
+                            //    'roleid'    => 5                // Student role.
+                            //), 'id' );
 
                             if ( !$enrolid ) {
                                 // Couldn't find an instance of the manual enrolment plugin. D'oh.
