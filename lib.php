@@ -1742,7 +1742,23 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                     // Group specified.
 
                     error_log( $this->errorlogtag . '   ' . $event->eventable->tutorgroup );
+/*
 
+Groups API:
+https://docs.moodle.org/dev/Groups_API
+
+
+require_once($CFG->dirroot.'/group/lib.php');
+
+$data = new stdClass();
+$data->courseid = idcourse;
+$data->idnumber = someidnumber;
+$data->name = 'group name';
+$data->description = 'group description';
+$data->descriptionformat = FORMAT_HTML;
+
+$newgroupid = groups_create_group($data);
+*/
                     // Does the group exist? If not, create it.
 
                     // Enrol the user in the group.
