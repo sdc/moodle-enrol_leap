@@ -1654,7 +1654,11 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                 }
             }
 
-            // Do nothing, enrolment or unenrolment depending on the start and end dates.
+
+            /**
+             * Key logic block: this decides what to do with the user.
+             * Do nothing, enrolment (including sorting out groups and group enrolment) or unenrolment depending on the start and end dates.
+             */
 //            $now = time();
 //            if ( strtotime( $event->eventable->start_date > $now ) ) {
 //                // This course hasn't started yet.
@@ -1666,9 +1670,11 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
 //            } else if ( strtotime( $event->eventable->end_date ) < $now ) {
 //                // This course has passed.
 //                // TODO: unenrolment (if enrolled by this plugin), otherwise nothing.
+
 //
 //            } else if ( strtotime( $event->eventable->start_date ) < $now && strtotime( $event->eventable->end_date ) > $now ) {
 //                // This course is live, so enrol if not already.
+                // Order this by ID?
                 $courses = $DB->get_records( 'course', null, null, 'id,shortname,fullname' );
 
 //var_dump($courses); exit();
@@ -1710,10 +1716,6 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                 // TODO: Some kind of counter here for consistency/debugging?
                 foreach ( $toenrol as $enrolme ) {
 
-                    // enrol_user()
-                    //   $this->enrol_user($instance, $userid, null, $data->timestart, $data->timeend, $data->status);
-                    // role_assign()
-
                     // Get the enrolment plugin instance. Enrol plugin name / course ID / role ID.
                     if ( !$enrolinstance = $DB->get_record( 'enrol', array( 'enrol' => 'leap', 'courseid' => $enrolme->id, 'roleid' => $this->get_config('roleid') ), 'id' ) ) {
                         if ( $this->logging ) {
@@ -1723,18 +1725,28 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                     }
 
                     // Course and role enrolment all in one go.
-                    $this->enrol_user( $enrolinstance, $user->id, $this->get_config('roleid'), time(), time() + ( $this->get_config('roleid') * 60 * 60 * 24 ), ENROL_USER_ACTIVE, true);
+                    $this->enrol_user( $enrolinstance, $user->id, $this->get_config('roleid'), time(), time() + $this->get_config('enrolperiod'), ENROL_USER_ACTIVE, true);
                     // TODO: report enrolment success (if we can even tell)?
 
 
                 }
 
-                // TODO: Unenrolment?
-                // Generate a list of all the user's **Leap enrolments** and compare them to the JSON list.
-                // Unenrol if not found in the JSON.
-
                 // TODO: Group scanning, creation and un/enrolment.
+                if  ( !isset( $event->eventable->tutorgroup ) || empty( $event->eventable->tutorgroup ) ) {
+                    if ( $this->logging ) {
+                        error_log( $this->errorlogtag . '   No tutorgroups specified, so bailing' );
+                    }
+                    // Do we want to bail if there are no turorgroups?
+                    //continue;
+                } else {
+                    // Group specified.
 
+                    error_log( $this->errorlogtag . '   ' . $event->eventable->tutorgroup );
+
+                    // Does the group exist? If not, create it.
+
+                    // Enrol the user in the group.
+                }
 
 //            } // END start and end dates loop.
 
