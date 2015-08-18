@@ -623,6 +623,9 @@ class enrol_leap_plugin extends enrol_plugin {
 
         // Reuse a function from the Leap block (which this plugin is dependent on).
         require_once( $CFG->dirroot . '/blocks/leap/locallib.php' );
+        require_once( $CFG->dirroot . '/lib/grouplib.php' );
+        require_once( $CFG->dirroot . '/group/lib.php' );
+
 
         // Create a string containing the current academic year; store for later use.
         $now    = time();
@@ -675,7 +678,7 @@ class enrol_leap_plugin extends enrol_plugin {
 
         } else {
             if ( $this->logging ) {
-                error_log( $this->errorlogtag . '  Enrolment/s for "' . $uname . '"' );
+                error_log( $this->errorlogtag . '  Enrolment/s for "' . $uname . '" (' . $user->id . ')' );
             }
         }
 
@@ -722,829 +725,6 @@ $sample_leap_json = '[{"event":{"about_person_id":null,"created_at":"2015-07-14T
 // http://jsonlint.com/
 // http://jsonformatter.curiousconcept.com/
 
-[
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2015-07-14T01:15:32+01:00",
-      "created_by_id":null,
-      "event_date":"2015-07-13T15:01:43+01:00",
-      "eventable_id":459503,
-      "eventable_type":"PersonCourse",
-      "id":11428982,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"create",
-      "updated_at":"2015-07-14T01:15:32+01:00",
-      "eventable":{
-        "application_date":"2015-07-13T15:01:43+01:00",
-        "course_id":41653,
-        "created_at":"2015-07-14T01:15:32+01:00",
-        "created_by_id":null,
-        "end_date":null,
-        "enrolment_date":null,
-        "id":459503,
-        "mis_status":"OFF  MADE",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2015-09-07T00:00:00+01:00",
-        "status":"not_started",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:01+01:00",
-        "course":{
-          "code":"D93HOR1F",
-          "created_at":"2015-06-16T11:31:26+01:00",
-          "id":41653,
-          "mis_id":"250914",
-          "title":"DIP L3 90 CREDIT HORTICULTURE",
-          "updated_at":"2015-07-15T04:25:21+01:00",
-          "vague_title":null,
-          "year":"15/16"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2015-05-01T01:02:21+01:00",
-      "created_by_id":null,
-      "event_date":"2015-04-30T09:17:31+01:00",
-      "eventable_id":448756,
-      "eventable_type":"PersonCourse",
-      "id":9197867,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2015-05-01T01:02:21+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":36790,
-        "created_at":"2015-05-01T01:02:21+01:00",
-        "created_by_id":null,
-        "end_date":"2015-07-03T00:00:00+01:00",
-        "enrolment_date":"2015-04-30T09:17:31+01:00",
-        "id":448756,
-        "mis_status":"Active",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"current",
-        "tutorgroup":"Q",
-        "updated_at":"2015-07-15T01:18:01+01:00",
-        "course":{
-          "code":"FS1MAT1F",
-          "created_at":"2014-08-27T09:35:00+01:00",
-          "id":36790,
-          "mis_id":"234682",
-          "title":"FUNCTIONAL SKILLS L1 MATHEMATICS",
-          "updated_at":"2015-07-15T07:00:54+01:00",
-          "vague_title":null,
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2015-04-23T01:34:40+01:00",
-      "created_by_id":null,
-      "event_date":"2015-04-22T14:24:43+01:00",
-      "eventable_id":447978,
-      "eventable_type":"PersonCourse",
-      "id":8942009,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"create",
-      "updated_at":"2015-04-23T01:34:40+01:00",
-      "eventable":{
-        "application_date":"2015-04-22T14:24:43+01:00",
-        "course_id":41099,
-        "created_at":"2015-04-23T01:34:40+01:00",
-        "created_by_id":87901,
-        "end_date":null,
-        "enrolment_date":null,
-        "id":447978,
-        "mis_status":"MyAppr",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2015-08-01T00:00:00+01:00",
-        "status":"not_started",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:01+01:00",
-        "course":{
-          "code":"APPHOR1D",
-          "created_at":"2015-04-03T01:04:19+01:00",
-          "id":41099,
-          "mis_id":"243121",
-          "title":"APPRENTICESHIP HORTICULTURE",
-          "updated_at":"2015-07-15T07:40:49+01:00",
-          "vague_title":null,
-          "year":"15/16"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2015-02-27T00:50:39+00:00",
-      "created_by_id":null,
-      "event_date":"2015-02-26T15:39:38+00:00",
-      "eventable_id":441713,
-      "eventable_type":"PersonCourse",
-      "id":7215713,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2015-02-27T00:50:39+00:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":40611,
-        "created_at":"2015-02-27T00:50:39+00:00",
-        "created_by_id":57606,
-        "end_date":"2015-07-03T00:00:00+01:00",
-        "enrolment_date":"2015-02-26T15:39:38+00:00",
-        "id":441713,
-        "mis_status":"Active",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"current",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:01+01:00",
-        "course":{
-          "code":"PD94871F",
-          "created_at":"2015-02-27T00:50:39+00:00",
-          "id":40611,
-          "mis_id":"237199",
-          "title":"ENHANCED PPD ALT ENGLISH DP2HOR1F",
-          "updated_at":"2015-07-15T01:18:01+01:00",
-          "vague_title":null,
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-09-10T07:22:27+01:00",
-      "created_by_id":3090,
-      "event_date":"2014-09-03T11:38:19+01:00",
-      "eventable_id":407547,
-      "eventable_type":"PersonCourse",
-      "id":4328326,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2014-09-10T07:22:27+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":36838,
-        "created_at":"2014-09-10T07:22:27+01:00",
-        "created_by_id":3090,
-        "end_date":"2014-10-16T00:00:00+01:00",
-        "enrolment_date":"2014-09-03T11:38:19+01:00",
-        "id":407547,
-        "mis_status":"Withdrawn",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"incomplete",
-        "tutorgroup":"F",
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"GC2ENG1F",
-          "created_at":"2014-08-27T13:14:55+01:00",
-          "id":36838,
-          "mis_id":"234706",
-          "title":"GCSE ENGLISH L2",
-          "updated_at":"2015-07-15T07:12:42+01:00",
-          "vague_title":null,
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-09-10T07:22:26+01:00",
-      "created_by_id":3090,
-      "event_date":"2014-09-03T11:37:56+01:00",
-      "eventable_id":407546,
-      "eventable_type":"PersonCourse",
-      "id":4328323,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2014-09-10T07:22:26+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":36849,
-        "created_at":"2014-09-10T07:22:26+01:00",
-        "created_by_id":3090,
-        "end_date":"2014-10-10T00:00:00+01:00",
-        "enrolment_date":"2014-09-03T11:37:56+01:00",
-        "id":407546,
-        "mis_status":"Transfered",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"incomplete",
-        "tutorgroup":"G",
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"GC2MAT1F",
-          "created_at":"2014-08-27T14:34:50+01:00",
-          "id":36849,
-          "mis_id":"234707",
-          "title":"GCSE MATHS L2",
-          "updated_at":"2015-07-15T07:25:09+01:00",
-          "vague_title":null,
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-09-10T07:22:26+01:00",
-      "created_by_id":3090,
-      "event_date":"2014-09-03T11:35:23+01:00",
-      "eventable_id":396621,
-      "eventable_type":"PersonCourse",
-      "id":4328318,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2014-09-10T07:22:26+01:00",
-      "eventable":{
-        "application_date":"2014-08-26T12:14:31+01:00",
-        "course_id":31497,
-        "created_at":"2014-08-29T12:22:09+01:00",
-        "created_by_id":64040,
-        "end_date":"2015-07-03T00:00:00+01:00",
-        "enrolment_date":"2014-09-03T11:35:23+01:00",
-        "id":396621,
-        "mis_status":"Active",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"current",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"DP2HOR1F",
-          "created_at":"2013-08-28T09:35:41+01:00",
-          "id":31497,
-          "mis_id":"213626",
-          "title":"DIP L2 HORTICULTURE",
-          "updated_at":"2015-07-15T06:48:49+01:00",
-          "vague_title":"LAND BASED",
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-09-10T07:22:26+01:00",
-      "created_by_id":3090,
-      "event_date":"2014-09-03T11:35:23+01:00",
-      "eventable_id":407545,
-      "eventable_type":"PersonCourse",
-      "id":4328320,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2014-09-10T07:22:26+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":37540,
-        "created_at":"2014-09-10T07:22:26+01:00",
-        "created_by_id":3090,
-        "end_date":"2015-07-03T00:00:00+01:00",
-        "enrolment_date":"2014-09-03T11:35:23+01:00",
-        "id":407545,
-        "mis_status":"Active",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"current",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"TU9HOR01",
-          "created_at":"2014-09-08T06:38:09+01:00",
-          "id":37540,
-          "mis_id":"228119",
-          "title":"CORE PPD DP2HOR1F",
-          "updated_at":"2015-07-15T04:25:20+01:00",
-          "vague_title":null,
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-08-29T12:22:09+01:00",
-      "created_by_id":64040,
-      "event_date":"2014-08-26T12:14:31+01:00",
-      "eventable_id":396621,
-      "eventable_type":"PersonCourse",
-      "id":4280050,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"create",
-      "updated_at":"2014-08-29T12:22:09+01:00",
-      "eventable":{
-        "application_date":"2014-08-26T12:14:31+01:00",
-        "course_id":31497,
-        "created_at":"2014-08-29T12:22:09+01:00",
-        "created_by_id":64040,
-        "end_date":"2015-07-03T00:00:00+01:00",
-        "enrolment_date":"2014-09-03T11:35:23+01:00",
-        "id":396621,
-        "mis_status":"Active",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"current",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"DP2HOR1F",
-          "created_at":"2013-08-28T09:35:41+01:00",
-          "id":31497,
-          "mis_id":"213626",
-          "title":"DIP L2 HORTICULTURE",
-          "updated_at":"2015-07-15T06:48:49+01:00",
-          "vague_title":"LAND BASED",
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-04-30T11:56:17+01:00",
-      "created_by_id":17914,
-      "event_date":"2014-04-30T10:27:38+01:00",
-      "eventable_id":380387,
-      "eventable_type":"PersonCourse",
-      "id":4129869,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"create",
-      "updated_at":"2014-04-30T11:56:17+01:00",
-      "eventable":{
-        "application_date":"2014-04-30T10:27:38+01:00",
-        "course_id":33959,
-        "created_at":"2014-04-30T11:56:17+01:00",
-        "created_by_id":17914,
-        "end_date":null,
-        "enrolment_date":null,
-        "id":380387,
-        "mis_status":"Trans Applic",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"not_started",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"D93CMA1F",
-          "created_at":"2013-11-20T18:42:35+00:00",
-          "id":33959,
-          "mis_id":"213599",
-          "title":"DIP L3 90 CREDIT COUNTRYSIDE MANAGEMENT",
-          "updated_at":"2015-07-15T06:45:06+01:00",
-          "vague_title":"LAND BASED",
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-04-30T11:56:18+01:00",
-      "created_by_id":17914,
-      "event_date":"2014-04-30T10:24:55+01:00",
-      "eventable_id":380388,
-      "eventable_type":"PersonCourse",
-      "id":4129871,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"create",
-      "updated_at":"2014-04-30T11:56:18+01:00",
-      "eventable":{
-        "application_date":"2014-04-30T10:24:55+01:00",
-        "course_id":35268,
-        "created_at":"2014-04-30T11:56:18+01:00",
-        "created_by_id":17914,
-        "end_date":null,
-        "enrolment_date":null,
-        "id":380388,
-        "mis_status":"Trans Applic",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2014-09-08T00:00:00+01:00",
-        "status":"not_started",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"DP1HRT1F",
-          "created_at":"2014-03-27T15:17:51+00:00",
-          "id":35268,
-          "mis_id":"213603",
-          "title":"DIP L1 PRACTICAL HORTICULTURE",
-          "updated_at":"2015-07-15T07:16:23+01:00",
-          "vague_title":"LAND BASED",
-          "year":"14/15"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-01-23T15:09:16+00:00",
-      "created_by_id":null,
-      "event_date":"2014-01-23T14:10:34+00:00",
-      "eventable_id":366317,
-      "eventable_type":"PersonCourse",
-      "id":3885572,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2014-01-23T15:09:16+00:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":34668,
-        "created_at":"2014-01-23T15:09:16+00:00",
-        "created_by_id":54,
-        "end_date":"2014-07-04T00:00:00+01:00",
-        "enrolment_date":"2014-01-23T14:10:34+00:00",
-        "id":366317,
-        "mis_status":"CompAch",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"complete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"NA9CCM1F",
-          "created_at":"2014-01-23T14:59:29+00:00",
-          "id":34668,
-          "mis_id":"220543",
-          "title":"NON-ACCREDITED STRETCH & CHALLENGE MATHS",
-          "updated_at":"2015-07-15T02:49:31+01:00",
-          "vague_title":null,
-          "year":"13/14"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2014-01-23T15:09:16+00:00",
-      "created_by_id":null,
-      "event_date":"2014-01-23T14:10:33+00:00",
-      "eventable_id":366316,
-      "eventable_type":"PersonCourse",
-      "id":3885569,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2014-01-23T15:09:16+00:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":34667,
-        "created_at":"2014-01-23T15:09:16+00:00",
-        "created_by_id":54,
-        "end_date":"2014-07-04T00:00:00+01:00",
-        "enrolment_date":"2014-01-23T14:10:33+00:00",
-        "id":366316,
-        "mis_status":"CompAch",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"complete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"NA9CCE1F",
-          "created_at":"2014-01-23T14:59:29+00:00",
-          "id":34667,
-          "mis_id":"220541",
-          "title":"NON-ACCREDITED STRETCH & CHALLENGE ENGLISH",
-          "updated_at":"2015-07-15T02:49:31+01:00",
-          "vague_title":null,
-          "year":"13/14"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2013-09-07T12:48:37+01:00",
-      "created_by_id":null,
-      "event_date":"2013-09-06T18:12:56+01:00",
-      "eventable_id":335461,
-      "eventable_type":"PersonCourse",
-      "id":3104879,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2013-09-07T12:48:37+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":31722,
-        "created_at":"2013-09-07T12:48:37+01:00",
-        "created_by_id":791,
-        "end_date":"2013-08-01T00:00:00+01:00",
-        "enrolment_date":"2013-09-06T18:12:56+01:00",
-        "id":335461,
-        "mis_status":"Non-Starter",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"incomplete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:17:59+01:00",
-        "course":{
-          "code":"GC2MAO1P",
-          "created_at":"2013-08-29T11:46:00+01:00",
-          "id":31722,
-          "mis_id":"213172",
-          "title":"GCSE MATHS L3 MKUP/L2 BEAUT/L3 MASS/L1 COMP TUES",
-          "updated_at":"2015-07-15T04:38:48+01:00",
-          "vague_title":null,
-          "year":"13/14"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2013-09-02T12:44:25+01:00",
-      "created_by_id":null,
-      "event_date":"2013-09-02T12:12:55+01:00",
-      "eventable_id":327811,
-      "eventable_type":"PersonCourse",
-      "id":3032876,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2013-09-02T12:44:25+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":31193,
-        "created_at":"2013-09-02T12:44:25+01:00",
-        "created_by_id":642,
-        "end_date":"2013-08-01T00:00:00+01:00",
-        "enrolment_date":"2013-09-02T12:12:55+01:00",
-        "id":327811,
-        "mis_status":"Non-Starter",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"incomplete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:17:59+01:00",
-        "course":{
-          "code":"GC2MAP1P",
-          "created_at":"2013-08-22T11:33:24+01:00",
-          "id":31193,
-          "mis_id":"213174",
-          "title":"GCSE MATHEMATICS - L2 ENVIRONMENT/BUSINESS WED",
-          "updated_at":"2015-07-15T04:47:20+01:00",
-          "vague_title":null,
-          "year":"13/14"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2013-09-02T12:44:25+01:00",
-      "created_by_id":null,
-      "event_date":"2013-09-02T12:12:39+01:00",
-      "eventable_id":327813,
-      "eventable_type":"PersonCourse",
-      "id":3032884,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2013-09-02T12:44:25+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":31872,
-        "created_at":"2013-09-02T12:44:25+01:00",
-        "created_by_id":642,
-        "end_date":"2013-08-01T00:00:00+01:00",
-        "enrolment_date":"2013-09-02T12:12:39+01:00",
-        "id":327813,
-        "mis_status":"Non-Starter",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"incomplete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"GC2ENJ1P",
-          "created_at":"2013-09-02T08:39:32+01:00",
-          "id":31872,
-          "mis_id":"213204",
-          "title":"GCSE ENGLISH - L2 ENVIRONMENT/L2 ELECTRICAL WED",
-          "updated_at":"2015-07-15T04:23:56+01:00",
-          "vague_title":null,
-          "year":"13/14"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2013-09-02T12:44:24+01:00",
-      "created_by_id":null,
-      "event_date":"2013-09-02T12:11:04+01:00",
-      "eventable_id":327809,
-      "eventable_type":"PersonCourse",
-      "id":3032870,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2013-09-02T12:44:24+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":30381,
-        "created_at":"2013-09-02T12:44:24+01:00",
-        "created_by_id":642,
-        "end_date":"2013-08-01T00:00:00+01:00",
-        "enrolment_date":"2013-09-02T12:11:04+01:00",
-        "id":327809,
-        "mis_status":"Non-Starter",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"incomplete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"FS2MATTC31",
-          "created_at":"2013-07-25T11:23:06+01:00",
-          "id":30381,
-          "mis_id":"207381",
-          "title":"FUNCTIONAL SKILLS L2 MATHS TC31",
-          "updated_at":"2015-07-15T04:42:00+01:00",
-          "vague_title":null,
-          "year":"13/14"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2013-09-02T12:44:24+01:00",
-      "created_by_id":null,
-      "event_date":"2013-09-02T12:11:04+01:00",
-      "eventable_id":327810,
-      "eventable_type":"PersonCourse",
-      "id":3032873,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2013-09-02T12:44:24+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":30379,
-        "created_at":"2013-09-02T12:44:24+01:00",
-        "created_by_id":642,
-        "end_date":"2013-08-01T00:00:00+01:00",
-        "enrolment_date":"2013-09-02T12:11:04+01:00",
-        "id":327810,
-        "mis_status":"Non-Starter",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"incomplete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"FS2ENGTC31",
-          "created_at":"2013-07-25T11:23:06+01:00",
-          "id":30379,
-          "mis_id":"207643",
-          "title":"FUNCTIONAL SKILLS L2 ENGLISH TC31",
-          "updated_at":"2015-07-15T04:42:01+01:00",
-          "vague_title":null,
-          "year":"13/14"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2013-09-02T12:44:25+01:00",
-      "created_by_id":null,
-      "event_date":"2013-09-02T12:11:04+01:00",
-      "eventable_id":304004,
-      "eventable_type":"PersonCourse",
-      "id":3032879,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2013-09-02T12:44:25+01:00",
-      "eventable":{
-        "application_date":"2013-06-05T17:53:57+01:00",
-        "course_id":27811,
-        "created_at":"2013-06-06T14:26:26+01:00",
-        "created_by_id":54,
-        "end_date":"2014-07-04T00:00:00+01:00",
-        "enrolment_date":"2013-09-02T12:11:04+01:00",
-        "id":304004,
-        "mis_status":"CompAch",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"complete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"DP2CCE1F",
-          "created_at":"2012-12-18T11:19:21+00:00",
-          "id":27811,
-          "mis_id":"193148",
-          "title":"DIP L2 COUNTRYSIDE & ENVIRONMENT",
-          "updated_at":"2015-07-15T04:31:28+01:00",
-          "vague_title":"COAST AND COUNTRYSIDE",
-          "year":"13/14"
-        }
-      }
-    }
-  },
-  {
-    "event":{
-      "about_person_id":null,
-      "created_at":"2013-09-02T12:44:25+01:00",
-      "created_by_id":null,
-      "event_date":"2013-09-02T12:11:04+01:00",
-      "eventable_id":327812,
-      "eventable_type":"PersonCourse",
-      "id":3032881,
-      "parent_id":null,
-      "person_id":11950,
-      "transition":"to_start",
-      "updated_at":"2013-09-02T12:44:25+01:00",
-      "eventable":{
-        "application_date":null,
-        "course_id":31902,
-        "created_at":"2013-09-02T12:44:25+01:00",
-        "created_by_id":642,
-        "end_date":"2014-07-04T00:00:00+01:00",
-        "enrolment_date":"2013-09-02T12:11:04+01:00",
-        "id":327812,
-        "mis_status":"CompAch",
-        "offer_code":null,
-        "person_id":11950,
-        "start_date":"2013-09-09T00:00:00+01:00",
-        "status":"complete",
-        "tutorgroup":null,
-        "updated_at":"2015-07-15T01:18:00+01:00",
-        "course":{
-          "code":"TU9CCE01",
-          "created_at":"2013-09-02T12:36:34+01:00",
-          "id":31902,
-          "mis_id":"210677",
-          "title":"TUTORIAL DP2CCE1F",
-          "updated_at":"2015-07-15T02:49:30+01:00",
-          "vague_title":null,
-          "year":"13/14"
-        }
-      }
-    }
-  }
-]
-
 */
 
         $leap_json = '';
@@ -1586,66 +766,74 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
 
         $leap_data = json_decode( $leap_json );
 
-        $events_total = count( $leap_data->events );
+        //$events_total = count( $leap_data->events );
+        $events_total = count( $leap_data );
         $events_count = 0;
 
         // Check the JSON for conditions and pull out what we need.
-        foreach ( $leap_data->events as $event ) {
+        //foreach ( $leap_data->events as $event ) {
+        foreach ( $leap_data as $event ) {
 
 //var_dump($event->eventable); die();
 //var_dump($event->eventable->start_date); die();
 
             $events_count++;
 
+            // Everything suddenly seems to be one layer deeper. I don't know what changed.
+            $event = $event->event;
+
             if ( $this->logging ) {
                 error_log( $this->errorlogtag . '  Processing enrolment ' . $events_count . ' of ' . $events_total );
             }
 
             // If the enrolment status is anything other than 'current'.
-            //if ( $event->eventable->status != 'current' ) {
-            if ( $event->eventable->status != 'complete' ) {
+            if ( $event->eventable->status != 'current' ) {
+            //if ( $event->eventable->status != 'complete' ) {
                 if ( $this->logging ) {
-                    error_log( $this->errorlogtag . '  Found non-current status "' . $event->eventable->status . '", so bailing' );
+                    error_log( $this->errorlogtag . '   Found non-current status "' . $event->eventable->status . '", so bailing' );
                 }
                 continue;
             } else {
                 if ( $this->logging ) {
-                    error_log( $this->errorlogtag . '  Found status "' . $event->eventable->status . '"' );
+                    error_log( $this->errorlogtag . '   Found status "' . $event->eventable->status . '"' );
                 }
             }
 
             // If there's no course code.
             if ( !isset( $event->eventable->course->code ) ) {
                 if ( $this->logging ) {
-                    error_log( $this->errorlogtag . '  Course code not found in JSON, so bailing' );
+                    error_log( $this->errorlogtag . '   Course code not found in JSON, so bailing' );
                 }
                 continue;
             } else {
                 $coursecode = $event->eventable->course->code;
                 if ( $this->logging ) {
-                    error_log( $this->errorlogtag . '  Found course code "' . $coursecode . '"' );
+                    error_log( $this->errorlogtag . '   Found course code "' . $coursecode . '"' );
                 }
             }
 
             // If not this academic year.
-            if ( $event->eventable->course->year != $acadyear ) ) {
+            if ( $this->fulllogging ) {
+                error_log( $this->errorlogtag . '  <Course ' . $coursecode . "'s academic year is " . $event->eventable->course->year );
+            }
+            if ( $event->eventable->course->year == $acadyear ) {
+            //if ( $event->eventable->course->year != $acadyear ) {
                 if ( $this->logging ) {
-                    error_log( $this->errorlogtag . '  Course not running in this (' . $acadyear . ') academic year, so bailing' );
+                    error_log( $this->errorlogtag . '   Course not running in this (' . $acadyear . ') academic year, so bailing' );
                 }
                 continue;
             } else {
                 if ( $this->logging ) {
-                    error_log( $this->errorlogtag . '  Course academic year in JSON matches this (' . $acadyear . ') academic year' );
+                    error_log( $this->errorlogtag . '   Course academic year in JSON matches this (' . $acadyear . ') academic year' );
                 }
             }
 
 
 
             // TESTING PURPOSES Only
-            $coursecode = 'AABB1212';
+            //$coursecode = 'AABB1212';
 
             // TODO: Probably move this to after the course enrolment stuff.
-            // TODO: Still waiting on course groups in the JSON from Kev.
             $groupcode = '';
             if ( isset( $event->eventable->groupcode ) ) {
                 $groupcode = $event->eventable->groupcode;
@@ -1691,12 +879,12 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                         if ( stripos( $blockinstance->config->coursecodes, $coursecode ) !== false ) {
                             $toenrol[] = $course;
                             if ( $this->logging ) {
-                                error_log( $this->errorlogtag . '   Course code "' . $coursecode . '" found in course ' . $course->id . ' (' . $course->shortname . ')' );
+                                error_log( $this->errorlogtag . '    Course code "' . $coursecode . '" found in course ' . $course->id . ' (' . $course->shortname . ')' );
                             }
                         } else {
                             // Just do logging, nothing else.
                             if ( $this->fulllogging ) {
-                                error_log( $this->errorlogtag . '   Course code "' . $coursecode . '" not found in course ' . $course->id . ' (' . $course->shortname . ')' );
+                                error_log( $this->errorlogtag . '   <Course code "' . $coursecode . '" not found in course ' . $course->id . ' (' . $course->shortname . ')' );
                             }
                         }
 
@@ -1717,12 +905,15 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                 foreach ( $toenrol as $enrolme ) {
 
                     // Get the enrolment plugin instance. Enrol plugin name / course ID / role ID.
-                    if ( !$enrolinstance = $DB->get_record( 'enrol', array( 'enrol' => 'leap', 'courseid' => $enrolme->id, 'roleid' => $this->get_config('roleid') ), 'id' ) ) {
+                    //if ( !$enrolinstance = $DB->get_record( 'enrol', array( 'id' => $id, 'enrol' => '...'), '*', MUST_EXIST);
+                    if ( !$enrolinstance = $DB->get_record( 'enrol', array( 'enrol' => 'leap', 'courseid' => $enrolme->id, 'roleid' => $this->get_config('roleid') ), '*', MUST_EXIST ) ) {
                         if ( $this->logging ) {
                             error_log( $this->errorlogtag . '  >No Leap enrolment plugin (student) instance for course ' . $enrolme->id . '/' . $enrolme->shortname . ' so bailing' );
                         }
                         continue;
                     }
+
+//var_dump($enrolinstance); die();
 
                     // Course and role enrolment all in one go.
                     $this->enrol_user( $enrolinstance, $user->id, $this->get_config('roleid'), time(), time() + $this->get_config('enrolperiod'), ENROL_USER_ACTIVE, true);
@@ -1731,21 +922,59 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
 
                 }
 
-                // TODO: Group scanning, creation and un/enrolment.
+
+                // Group scanning, creation and adding/removal.
+                // TODO: transform the tutorial code, e.g. to uppercase?
+                $event->eventable->tutorgroup = strtoupper( trim ( $event->eventable->tutorgroup ) );
                 if  ( !isset( $event->eventable->tutorgroup ) || empty( $event->eventable->tutorgroup ) ) {
                     if ( $this->logging ) {
-                        error_log( $this->errorlogtag . '   No tutorgroups specified, so bailing' );
+                        error_log( $this->errorlogtag . '   No tutorial groups specified' );
                     }
                     // Do we want to bail if there are no turorgroups?
                     //continue;
                 } else {
                     // Group specified.
-
-                    error_log( $this->errorlogtag . '   ' . $event->eventable->tutorgroup );
+                    if ( $this->logging ) {
+                        error_log( $this->errorlogtag . '   Tutorial group ' . $event->eventable->tutorgroup . ' found in JSON' );
+                    }
 
                     // Does the group exist? If not, create it.
+                    if ( !$groupid = groups_get_group_by_name( $course->id, $event->eventable->tutorgroup )) {
+                        // Create the named group.
 
-                    // Enrol the user in the group.
+                        $newgroup = new stdClass();
+                        $newgroup->courseid             = $course->id;
+                        $newgroup->name                 = $event->eventable->tutorgroup;
+                        $newgroup->description          = 'Tutorial Group ' . $event->eventable->tutorgroup;
+                        $newgroup->descriptionformat    = FORMAT_HTML;
+                        $groupid = groups_create_group( $newgroup );
+
+                        if ( $this->logging ) {
+                            error_log( $this->errorlogtag . '   Tutorial group' . $event->eventable->tutorgroup . ' created' );
+                        }
+
+                    } else {
+                        // Group already exists.
+                        if ( $this->logging ) {
+                            error_log( $this->errorlogtag . '   Tutorial group' . $event->eventable->tutorgroup . ' already exists' );
+                        }
+                    }
+
+                    // $groupid should now be the id of the existing/new group
+                    if ( !$grouped = groups_is_member( $groupid, $user->id ) ) {
+                        // Add the user in the group.
+                        groups_add_member( $groupid, $user->id );
+                        if ( $this->logging ) {
+                            error_log( $this->errorlogtag . '   User added to the ' . $event->eventable->tutorgroup . ' tutorial group' );
+                        }
+
+                    } else {
+                        if ( $this->logging ) {
+                            error_log( $this->errorlogtag . '   User is already in the ' . $event->eventable->tutorgroup . ' tutorial group' );
+                        }
+                    }
+
+
                 }
 
 //            } // END start and end dates loop.
