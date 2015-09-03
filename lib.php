@@ -869,9 +869,15 @@ Talk to RB about: putting x days on the enrolment also (e.g.365).
                             }
                             continue;
                         }
-                        $blockinstance  = block_instance( 'leap', $blockrecord );
 
-                        if ( stripos( $blockinstance->config->coursecodes, $coursecode ) !== false ) {
+                        if ( !$blockinstance  = block_instance( 'leap', $blockrecord ) ) {
+                            if ( $this->logging ) {
+                                error_log( $this->errorlogtag . '    No Leap block instance found for course "' . $course->id . '" (' . $course->shortname . '), so bailing' );
+                            }
+                            continue;
+                        }
+
+                        if ( isset ( $blockinstance->config->coursecodes ) && stripos( $blockinstance->config->coursecodes, $coursecode ) !== false ) {
                             $toenrol[] = $course;
                             if ( $this->logging ) {
                                 error_log( $this->errorlogtag . '    Course code "' . $coursecode . '" found in course ' . $course->id . ' (' . $course->shortname . ')' );
