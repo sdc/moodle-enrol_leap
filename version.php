@@ -24,10 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version        = 2015081800;
+$plugin->version        = 2015090700;
 $plugin->requires       = 2014051200;       // Requires Moodle 2.7 or newer.
 $plugin->component      = 'enrol_leap';
-$plugin->maturity       = MATURITY_ALPHA;
+$plugin->maturity       = MATURITY_BETA;
 $plugin->release        = '3.0.0';
 $plugin->dependencies   = array (
     'local_leapwebservices' => 2014112400,  // Needs the Leap web services local plugin.
