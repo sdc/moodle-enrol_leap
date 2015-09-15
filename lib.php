@@ -933,7 +933,7 @@ class enrol_leap_plugin extends enrol_plugin {
                                 }
                             } else {
                                 if ( $this->logging ) {
-                                    error_log( $this->errorlogtag . '  xTutorial group "' . trim( $event->eventable->tutorgroup ) . '" could not be created' );
+                                    error_log( $this->errorlogtag . ' x Tutorial group "' . trim( $event->eventable->tutorgroup ) . '" could not be created' );
                                 }
                             }
 
@@ -954,7 +954,7 @@ class enrol_leap_plugin extends enrol_plugin {
                                 }
                             } else {
                                 if ( $this->logging ) {
-                                    error_log( $this->errorlogtag . '  xUser not added to the "' . trim( $event->eventable->tutorgroup ) . '" [' . $groupid . '] tutorial group for some reason' );
+                                    error_log( $this->errorlogtag . ' x User not added to the "' . trim( $event->eventable->tutorgroup ) . '" [' . $groupid . '] tutorial group for some reason' );
                                 }
                             }
 
