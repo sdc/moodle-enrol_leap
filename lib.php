@@ -700,56 +700,20 @@ class enrol_leap_plugin extends enrol_plugin {
         }
 */
 
-
-        // This will more than likely change when a new URL is available.
-        // Development URL: http://172.21.11.5:3000/people/10083332/views/courses.json
-        // TODO: URL comes from the Leap block.
-        // TODO: tracker hash comes from the user created when the Webservices plugin was installed and configured.
         $leap_url = get_config( 'block_leap', 'leap_url' );
-        $leap_auth_token = get_auth_token();
-        //$url = preg_replace( '/USERNAME/', $uname, $leap_url ) . '?token=' . $leap_auth_token->token;
-// Sort this out as a priority.
-        $url = 'http://leap.southdevon.ac.uk/people/' . $uname . '/views/courses.json?token=d840769c15d2a61f056bc239363398ff8e8b94418789534ed0b0a52659c25f2e695cb579bad026c89896669c9485fa25be07772a2756f4af9859dfd6bd1e19a4';
+        $auth_token = get_config( 'block_leap', 'auth_token' );
+        $url = $leap_url . '/' . $uname . '/views/courses.json?token=' . $auth_token;
 
         // Some epic logging, prob not needed unless extreme debugging is taking place.
         if ( $this->fulllogging ) {
             error_log( $this->errorlogtag . ' <Leap URL: ' . $url );
         }
 
-
-        // Leap JSON url: http://webdev.southdevon.ac.uk:3000/people/10083332/timeline_views/courses?extended=1
-        // http://jsonlint.com/
-        // http://jsonformatter.curiousconcept.com/
- 
-
         $leap_json = '';
-        /*if ( !$leap_xml = file_get_contents($url) ) {*/
         if ( !$leap_json = file_get_contents( $url ) ) {
             error_log( $this->errorlogtag . ' >Bailing out: couldn\'t get the JSON from Leap' );
             return false;
         }
-
-        /*
-        Process:
-        * Enrolment
-        1.  find 'current' courses from Leap
-        2.  ensure they are valid in the current academic year (some courses roll on for a while)
-        3.  get the course code
-        4.  check if one or more courses exists in Moodle
-        For each course:
-        5.  enrol on that course
-        6.  add student role on that course
-        7.  check if user is in a group for that course
-        If user is in a group for that course:
-        8.  check if group exists
-        9a. if group doesn't exist for that course, create it
-        9b. if group exists: add user to that group
-        * Unenrolment
-        10  if the user is on Moodle courses which they aren't on in EBS and were enrolled on those courses by this plugin: unenrol.
-        */
-
-        /* Testing purposes only! */
-        //$leap_json = $sample_leap_json;
 
         if ( $this->fulllogging ) {
             error_log( $this->errorlogtag . ' <Leap JSON: ' . $leap_json );
