@@ -702,7 +702,7 @@ class enrol_leap_plugin extends enrol_plugin {
 
         $leap_url = get_config( 'block_leap', 'leap_url' );
         $auth_token = get_config( 'block_leap', 'auth_token' );
-        $url = $leap_url . '/' . $uname . '/views/courses.json?token=' . $auth_token;
+        $url = $leap_url . '/people/' . $uname . '/views/courses.json?token=' . $auth_token;
 
         // Some epic logging, prob not needed unless extreme debugging is taking place.
         if ( $this->fulllogging ) {
