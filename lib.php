@@ -857,9 +857,16 @@ class enrol_leap_plugin extends enrol_plugin {
                         continue;
                     }
 
-                    // Course and role enrolment all in one go.
-                    $this->enrol_user( $enrolinstance, $user->id, $this->get_config( 'roleid' ), time(), time() + $this->get_config( 'enrolperiod' ), ENROL_USER_ACTIVE, true);
-                    // TODO: report enrolment success (if we can even tell)?
+                    // TODO: Skip if already enrolled...
+                    if ( !is_enrolled( context_course::instance( $enrolme->id ), $user->id, null, true ) ) {
+                        // Course and role enrolment all in one go.
+                        $this->enrol_user( $enrolinstance, $user->id, $this->get_config( 'roleid' ), time(), time() + $this->get_config( 'enrolperiod' ), ENROL_USER_ACTIVE, true);
+                        if ( $this->logging ) {
+                            error_log( $this->errorlogtag . '  Leap-enrolled ' . $user->id . ' onto course ' . $enrolme->id . ' (probably)' );
+                        }
+                    } else {
+
+                    }
 
                 //} // For each course code found, do the group thing too.
 
