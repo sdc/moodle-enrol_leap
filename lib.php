@@ -860,7 +860,7 @@ class enrol_leap_plugin extends enrol_plugin {
                     // TODO: Skip if already enrolled...
                     if ( !is_enrolled( context_course::instance( $enrolme->id ), $user->id, null, true ) ) {
                         // Course and role enrolment all in one go.
-                        $this->enrol_user( $enrolinstance, $user->id, $this->get_config( 'roleid' ), time(), time() + $this->get_config( 'enrolperiod' ), ENROL_USER_ACTIVE, true);
+                        $this->enrol_user( $enrolinstance, $user->id, $this->get_config( 'roleid' ), time() - 60, time() + $this->get_config( 'enrolperiod' ), ENROL_USER_ACTIVE, true);
                         if ( $this->logging ) {
                             error_log( $this->errorlogtag . '  Leap-enrolled ' . $user->id . ' onto course ' . $enrolme->id . ' (probably)' );
                         }
