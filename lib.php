@@ -732,7 +732,8 @@ class enrol_leap_plugin extends enrol_plugin {
             $events_count++;
 
             // Everything suddenly seems to be one layer deeper. I don't know what changed.
-            $event = $event->event;
+            //$event = $event->event;
+            // 20180418 OW - Everything suddenly seems to be one layer higher.  Back to where it should be?  This was after a Ruby on Rails upgrade on the Leap server so the line above is no longer required.
 
             if ( $this->logging ) {
                 error_log( $this->errorlogtag . '  Processing enrolment ' . $events_count . ' of ' . $events_total );
